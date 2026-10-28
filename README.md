@@ -17,3 +17,7 @@ pkg.hnl     dependencies, when any: `{ deps: { <name>: "branch:<ref>" } }`
 ```bash
 HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
 ```
+
+## License
+
+MIT.
