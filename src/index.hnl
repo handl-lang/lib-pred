@@ -55,7 +55,7 @@ do {
   -- Internal helpers (not exported)
   -- -------------------------------------------------------------------
 
-  rev :: xs ~> {
+  rev := xs ~> {
     while { xs: xs, acc: [] } {
       [xs, acc] ~> match xs {
         []: { out: acc },
@@ -65,7 +65,7 @@ do {
   }
 
   -- is `x` an element of `xs`?
-  member :: [xs, x] ~> {
+  member := [xs, x] ~> {
     while { xs: xs, x: x } {
       [xs, x] ~> match xs {
         []: { out: false },
@@ -79,7 +79,7 @@ do {
   }
 
   -- does char-list `xs` start with char-list `ps`?
-  prefix_match :: [xs, ps] ~> {
+  prefix_match := [xs, ps] ~> {
     while { xs: xs, ps: ps } {
       [xs, ps] ~> match ps {
         []: { out: true },
@@ -97,7 +97,7 @@ do {
 
   -- substring search over char lists (Rust `str::contains` semantics;
     -- an empty needle matches)
-  s_contains :: [s, pat] ~> {
+  s_contains := [s, pat] ~> {
     do {
       while { xs: char.chars(s), ps: char.chars(pat) } {
         [xs, ps] ~> if prefix_match(xs, ps) {
@@ -113,7 +113,7 @@ do {
   }
 
   -- does `s` contain a glob metacharacter (`*` or `?`)?
-  is_glob_pat :: s ~> {
+  is_glob_pat := s ~> {
     if s_contains(s, "*") {
       true
     } else {
@@ -122,7 +122,7 @@ do {
   }
 
   -- trim leading whitespace off a char list
-  triml_cs :: cs ~> {
+  triml_cs := cs ~> {
     while { xs: cs, go: true } {
       [xs, go] ~> match xs {
         []: { out: [] },
@@ -136,14 +136,14 @@ do {
   }
 
   -- trim leading/trailing whitespace off a char list
-  trim_cs :: cs ~> {
+  trim_cs := cs ~> {
     rev(triml_cs(rev(triml_cs(cs))))
   }
 
   -- split a char list on a single separator char (Rust `str::split`
     -- semantics: empty segments are kept)
-  split_cs :: [cs, sep] ~> {
-    parts :: while { xs: cs, cur: [], acc: [] } {
+  split_cs := [cs, sep] ~> {
+    parts := while { xs: cs, cur: [], acc: [] } {
       [xs, cur, acc] ~> match xs {
         []: { out: rev([rev(cur), ...acc]) },
         [h, ...t]: if h == sep {
@@ -158,7 +158,7 @@ do {
 
   -- collapse `**` to `*` over a pattern char list
   -- (Rust `str::replace("**", "*")`: non-overlapping, left-to-right)
-  collapse_stars :: pcs ~> {
+  collapse_stars := pcs ~> {
     while { xs: pcs, acc: [] } {
       [xs, acc] ~> match xs {
         []: { out: rev(acc) },
@@ -170,7 +170,7 @@ do {
 
   -- glob backtrack step: resume at the last `*` with one more char
   -- consumed. Returns a `while`-step result (`{ out: _ }`/`{ state: _ }`).
-  glob_bt :: [sp, sv, has_star] ~> {
+  glob_bt := [sp, sv, has_star] ~> {
     if has_star {
       match sv {
         []: { out: false },
@@ -184,7 +184,7 @@ do {
   -- iterative glob match over char lists with single-star backtracking
   -- (equivalent to the former recursive `glob_matches_segment`: on
     -- mismatch, the most recent `*` retries with one more char consumed)
-  glob_seg :: [p0, v0] ~> {
+  glob_seg := [p0, v0] ~> {
     while { p: p0, v: v0, sp: [], sv: [], has_star: false } {
       [p, v, sp, sv, has_star] ~> match p {
         []: if v == [] {
@@ -210,7 +210,7 @@ do {
   }
 
   -- does the string `s` start with `!`?
-  starts_bang :: s ~> {
+  starts_bang := s ~> {
     match char.chars(s) {
       ["!", ...t]: true,
       _: false
@@ -218,7 +218,7 @@ do {
   }
 
   -- drop the first char of `s`
-  tail_str :: s ~> {
+  tail_str := s ~> {
     match char.chars(s) {
       []: "",
       [h, ...t]: char.from_chars(t)
@@ -227,18 +227,18 @@ do {
 
   -- parse a tag expression into `{ name, negated }` term records.
   -- `expr := term ("," term)*`, `term := "!"? name`; empty terms drop.
-  parse_terms :: expr ~> {
-    raw :: split_cs(char.chars(expr), ",")
-    terms :: while { xs: raw, acc: [] } {
+  parse_terms := expr ~> {
+    raw := split_cs(char.chars(expr), ",")
+    terms := while { xs: raw, acc: [] } {
       [xs, acc] ~> match xs {
         []: { out: rev(acc) },
         [h, ...t]: do {
-          s :: char.from_chars(trim_cs(h))
+          s := char.from_chars(trim_cs(h))
           if s == "" {
             { state: { xs: t, acc: acc } }
           } else {
             if starts_bang(s) {
-              n :: char.from_chars(trim_cs(char.chars(tail_str(s))))
+              n := char.from_chars(trim_cs(char.chars(tail_str(s))))
               { state: { xs: t, acc: [{ name: n, negated: true }, ...acc] } }
             } else {
               { state: { xs: t, acc: [{ name: s, negated: false }, ...acc] } }
@@ -253,8 +253,8 @@ do {
   -- does one parsed term hold for tag list `tags`?
   -- An empty name (`"!"` alone) maps to `tag_predicate("")` = `always`
   -- in the old impl, so `hit` is `true` before negation applies.
-  term_matches :: [term, tags] ~> {
-    hit :: if term.name == "" {
+  term_matches := [term, tags] ~> {
+    hit := if term.name == "" {
       true
     } else {
       member(tags, term.name)
@@ -268,8 +268,8 @@ do {
 
   -- does a whole tag expression hold for tag list `tags`?
   -- An expression with no terms selects all (`Predicate::True` parity).
-  expr_matches :: [expr, tags] ~> {
-    terms :: parse_terms(expr)
+  expr_matches := [expr, tags] ~> {
+    terms := parse_terms(expr)
     do {
       while { ts: terms, saw: false } {
         [ts, saw] ~> match ts {
@@ -285,7 +285,7 @@ do {
   }
 
   -- AND-fold a list of tag expressions over `tags` (repeated `--tag`).
-  all_exprs :: [exprs, tags] ~> {
+  all_exprs := [exprs, tags] ~> {
     while { es: exprs, go: true } {
       [es, go] ~> match es {
         []: { out: true },
@@ -299,7 +299,7 @@ do {
   }
 
   -- one name pattern: glob if it contains `*`/`?`, else substring.
-  name_match :: [pat, name] ~> {
+  name_match := [pat, name] ~> {
     if is_glob_pat(pat) {
       glob_seg(collapse_stars(char.chars(pat)), char.chars(name))
     } else {
@@ -308,7 +308,7 @@ do {
   }
 
   -- AND-fold a list of name patterns over `c.name`.
-  all_names :: [pats, name] ~> {
+  all_names := [pats, name] ~> {
     while { ps: pats, go: true } {
       [ps, go] ~> match ps {
         []: { out: true },
@@ -322,7 +322,7 @@ do {
   }
 
   -- project a named field out of the case record
-  get_field :: [c, fname] ~> {
+  get_field := [c, fname] ~> {
     match fname {
       "name": c.name,
       "path": c.path,
@@ -363,7 +363,7 @@ do {
     -- case predicate arrow (the composition the CLI filter surface
       -- denotes: every name pattern AND every tag expression must hold)
     build: spec ~> (c ~> {
-        name_ok :: all_names(spec.names, c.name)
+        name_ok := all_names(spec.names, c.name)
         if name_ok {
           all_exprs(spec.tags, c.tags)
         } else {
@@ -375,7 +375,7 @@ do {
     -- `build` denotes, inlined (record fields cannot reference sibling
       -- fields by bare name inside the record literal)
     matches: [spec, c] ~> {
-      name_ok :: all_names(spec.names, c.name)
+      name_ok := all_names(spec.names, c.name)
       if name_ok {
         all_exprs(spec.tags, c.tags)
       } else {
