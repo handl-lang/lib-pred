@@ -1,3 +1,30 @@
+# lib-pred
+
+Predicate/filter combinator library (pure handl).
+
+## Layout
+
+| path | role |
+| --- | --- |
+| `src/index.hnl` | the library |
+| `pkg.hnl` | package manifest — `modules: ["pred"]` |
+| `scripts/hnl-gate.sh`, `ci.sh` | the gate / bupha entry |
+
+## Contract
+
+- Predicate/filter combinators over handl arrows; see `src/index.hnl`
+  for the surface.
+
+## Verification
+
+```bash
+HNL=../host-cli/target/debug/hnl scripts/hnl-gate.sh
+```
+
+## License
+
+MIT.
+
 <!-- myco:agent-awareness -->
 
 ## Agent awareness
