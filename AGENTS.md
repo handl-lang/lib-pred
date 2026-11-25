@@ -8,7 +8,7 @@ Predicate/filter combinator library (pure handl).
 | --- | --- |
 | `src/index.hnl` | the library |
 | `pkg.hnl` | package manifest — `modules: ["pred"]` |
-| `scripts/hnl-gate.sh`, `ci.sh` | the gate / bupha entry |
+| `scripts/hnl-gate.sh`, `workflows/gate.yaml` | the gate / bupha entry |
 
 ## Contract
 
