@@ -10,7 +10,10 @@
 --- Combinator vocabulary (all pure handl):
 ---
 ---   always / never            -- constant predicates (arrows `c ~> _`)
----   and(p, q) / or(p, q)      -- boolean composition of case predicates
+---   and_(p, q) / or_(p, q)    -- boolean composition of case predicates
+---                              (`and`/`or` are infix keywords since the
+---                              word-form lex rules landed — they cannot be
+---                              binding/export names, hence the `_` suffix)
 ---   not(p)                    -- negation
 ---   field(name, m)            -- apply value-matcher `m` to `c.<name>`
 ---   exact(v)                  -- value matcher: `x == v`
@@ -36,7 +39,7 @@
 ---     `!` negates, terms are trimmed, empty terms are dropped, and an
 ---     expression with no terms selects all. Multiple tag expressions
 ---     (repeated `--tag`) AND together.
----   - `and`/`or` here are binary (the Rust `Vec` n-ary forms were
+---   - `and_`/`or_` here are binary (the Rust `Vec` n-ary forms were
   ---     internal flattening only; the public surface was binary).
 ---
 --- Authoring constraints observed in this file (language quirks):
@@ -345,9 +348,9 @@ export never := c ~> false
 
   -- boolean composition of case predicates
   
-export and := [p, q] ~> (c ~> if p(c) { q(c) } else { false })
+export and_ := [p, q] ~> (c ~> if p(c) { q(c) } else { false })
 
-export or := [p, q] ~> (c ~> if p(c) { true } else { q(c) })
+export or_ := [p, q] ~> (c ~> if p(c) { true } else { q(c) })
 
 export not := p ~> (c ~> if p(c) { false } else { true })
 
